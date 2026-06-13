@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+{% from "_nav.html" import bottom_nav %}
+{% block title %}Home{% endblock %}
+
+{% block body %}
+<div class="app-wrapper">
+
+  <header class="app-header">
+    <span class="header-icon">🎓</span>
+    <h1>Isko-Learn</h1>
+    <a href="{{ url_for('profile') }}" style="color:#fff; font-size:22px;">👤</a>
+  </header>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for cat, msg in messages %}
+      <div class="flash-container">
+        <div class="flash flash-{{ cat }}">{{ '✅' if cat == 'success' else '⚠️' }} {{ msg }}</div>
+      </div>
+    {% endfor %}
+  {% endwith %}
+
+  <div class="page-content">
+
+    <!-- Greeting -->
+    <h2 class="page-title">Hi, {{ user.name.split()[0] }}! 👋</h2>
+    <p class="page-subtitle">{{ user.program_name or 'PUP Student' }}</p>
+
+    <!-- XP Bar -->
+    <div class="card" style="padding:14px 18px;">
+      <div class="d-flex justify-between align-center mb-1">
+        <span style="font-size:13px; font-weight:600; color:var(--primary);">⭐ {{ user.xp }} XP</span>
+        <span class="text-xs text-muted">🔥 {{ user.streak }}-day streak</span>
+      </div>
+      <div class="xp-bar-wrap">
+        <div class="xp-bar-fill" style="width:{{ [user.xp % 500 / 5, 100]|min }}%;"></div>
+      </div>
+      <div class="text-xs text-muted mt-1">{{ 500 - (user.xp % 500) }} XP to next level</div>
+    </div>
+
+    <!-- Weak Area Alert -->
+    {% if weak %}
+      <p class="section-title">⚠️ Needs Attention</p>
+      <div class="card card-danger">
+        <div class="d-flex justify-between align-center mb-1">
+          <span class="badge badge-danger">Weak Subject</span>
+          <span class="text-xs text-muted">{{ weak.avg_score | round(0) | int }}% avg</span>
+        </div>
+        <h4 style="font-size:15px; font-weight:700; margin:6px 0 4px;">Focus: {{ weak.name }}</h4>
+        <p style="font-size:13px; margin:0 0 12px;" class="text-muted">
+          Your score is below 60% in this subject. Personalized resources are ready.
+        </p>
+        <a href="{{ url_for('learn') }}" class="btn btn-sm">📚 View Resources</a>
+      </div>
+    {% endif %}
+
+    <!-- Recent Activity -->
+    {% if recent_scores %}
+      <p class="section-title">Recent Quizzes</p>
+      {% for s in recent_scores %}
+        {% set pct = (s.score / s.total * 100) | round(0) | int %}
+        <div class="card" style="padding:14px 16px;">
+          <div class="d-flex justify-between align-center">
+            <div>
+              <div style="font-size:14px; font-weight:600;">{{ s.title }}</div>
+              <div class="text-xs text-muted mt-1">{{ s.taken_at[:10] }}</div>
+            </div>
+            <div style="font-size:22px; font-weight:800; color:{{ 'var(--success)' if pct >= 75 else ('var(--warning)' if pct >= 60 else 'var(--danger)') }};">
+              {{ pct }}%
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Recommended Resources -->
+    {% if recommendations %}
+      <p class="section-title">📌 Recommended For You</p>
+      {% for r in recommendations %}
+        <div class="card">
+          <div class="resource-card">
+            <div class="resource-icon {{ r.type }}">
+              {{ '📄' if r.type == 'pdf' else ('▶️' if r.type == 'video' else ('🎮' if r.type == 'activity' else '🗂️')) }}
+            </div>
+            <div class="resource-body">
+              <h4>{{ r.title }}</h4>
+              <span class="badge badge-{{ 'danger' if r.type == 'pdf' else ('info' if r.type == 'video' else 'success') }}">{{ r.type.upper() }}</span>
+            </div>
+            <a href="{{ r.url }}" target="_blank" class="btn btn-outline btn-sm" style="flex-shrink:0;">Open</a>
+          </div>
+        </div>
+      {% endfor %}
+    {% endif %}
+
+    <!-- Achievements -->
+    {% if achievements %}
+      <p class="section-title">🏆 Recent Badges</p>
+      <div class="badge-grid">
+        {% for a in achievements %}
+          <div class="achievement-badge">
+            <span class="icon">{{ a.badge_icon }}</span>
+            <span class="name">{{ a.badge_name }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <p class="section-title">Quick Actions</p>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:8px;">
+      <a href="{{ url_for('quiz') }}" class="btn" id="btn-take-quiz">📝 Take Quiz</a>
+      <a href="{{ url_for('learn') }}" class="btn btn-outline" id="btn-browse">📚 Browse</a>
+      <a href="{{ url_for('games') }}" class="btn btn-outline" id="btn-games">🎮 Play Games</a>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-outline" id="btn-stats">📊 My Stats</a>
+    </div>
+
+  </div>
+
+  {{ bottom_nav('home') }}
+</div>
+{% endblock %}
