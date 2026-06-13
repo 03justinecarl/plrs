@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block title %}Quiz Result{% endblock %}
+
+{% block body %}
+<div class="app-wrapper">
+
+  <header class="app-header">
+    <span class="header-icon">📊</span>
+    <h1>Quiz Result</h1>
+  </header>
+
+  <div class="page-content no-nav" style="padding-bottom:40px;">
+
+    <!-- Score Card -->
+    <div class="card" style="text-align:center; padding:32px 20px; margin-bottom:16px;">
+      <div style="font-size:64px; line-height:1; margin-bottom:12px;">
+        {{ '🎉' if pct >= 75 else ('😐' if pct >= 60 else '📖') }}
+      </div>
+      <div style="font-size:52px; font-weight:800; color:{{ 'var(--success)' if pct >= 75 else ('var(--warning)' if pct >= 60 else 'var(--danger)') }};">
+        {{ pct }}%
+      </div>
+      <div style="font-size:16px; color:var(--text-muted); margin-top:4px;">
+        {{ score }} / {{ total }} correct
+      </div>
+      <div style="margin-top:16px;">
+        <span class="badge badge-{{ 'success' if pct >= 75 else ('warning' if pct >= 60 else 'danger') }}" style="font-size:13px; padding:6px 14px;">
+          {{ 'Excellent!' if pct >= 75 else ('Keep Going!' if pct >= 60 else 'Needs Review') }}
+        </span>
+      </div>
+    </div>
+
+    <!-- XP Earned -->
+    <div class="card card-success" style="text-align:center; padding:14px;">
+      <span style="font-size:15px; font-weight:700; color:var(--success);">⭐ +{{ xp_gain }} XP Earned!</span>
+    </div>
+
+    <!-- Wrong Answers Review -->
+    {% if wrong %}
+      <p class="section-title">📋 Review Incorrect Answers</p>
+      {% for q in wrong %}
+        <div class="card card-danger" style="padding:14px 16px;">
+          <div style="font-size:14px; font-weight:600; margin-bottom:10px;">{{ q.question }}</div>
+          {% set answers = {'a': q.choice_a, 'b': q.choice_b, 'c': q.choice_c, 'd': q.choice_d} %}
+          <div style="font-size:13px; color:var(--success); margin-bottom:4px;">
+            ✅ Correct: <strong>{{ answers[q.correct] }}</strong>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="card card-success" style="text-align:center; padding:20px;">
+        <div style="font-size:32px; margin-bottom:8px;">💯</div>
+        <p style="margin:0; font-weight:700; color:var(--success);">Perfect Score! All answers correct!</p>
+      </div>
+    {% endif %}
+
+    <!-- Low score: show resources -->
+    {% if pct < 60 %}
+      <div class="card card-warning" style="margin-top:8px;">
+        <p style="font-size:14px; font-weight:600; margin-bottom:10px;">
+          📚 Resources have been recommended based on this quiz result.
+        </p>
+        <a href="{{ url_for('learn') }}" class="btn btn-sm" style="display:inline-flex; width:auto;">View Resources</a>
+      </div>
+    {% endif %}
+
+    <!-- Actions -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:20px;">
+      <a href="{{ url_for('quiz') }}" class="btn btn-outline" id="back-to-quizzes">← All Quizzes</a>
+      <a href="{{ url_for('home') }}" class="btn" id="go-home">🏠 Home</a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}
